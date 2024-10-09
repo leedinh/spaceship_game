@@ -1,6 +1,7 @@
 mod asset_loader;
 mod asteroids;
 mod camera;
+mod collision_detection;
 mod debug;
 mod movement;
 mod spaceship;
@@ -27,6 +28,7 @@ fn main() {
         .add_plugins(MovementPlugin)
         // .add_plugins(DebugPlugin)
         .add_plugins((SpaceshipPlugin, AsteroidPlugin))
+        .add_plugins(collision_detection::CollisionDetectionPlugin)
         .add_plugins(CameraPlugin)
         .run();
 }
