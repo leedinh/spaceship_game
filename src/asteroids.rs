@@ -5,9 +5,10 @@ use rand::Rng;
 
 use crate::{
     asset_loader::SceneAssets,
-    collision_detection::Collider,
+    collision_detection::{Collider, CollisionDamage},
+    health::Health,
     movement::{Acceleration, MovingObjectBundle, Velocity},
-    spaceship,
+    schedule::InGameSet,
 };
 
 const VELOCITY_SCALAR: f32 = 5.0;
@@ -16,6 +17,8 @@ const SPAWN_RANGE_X: Range<f32> = -25.0..25.0;
 const SPAWN_RANGE_Z: Range<f32> = 0.0..50.0;
 const ASTEROID_ROTATION_SPEED: f32 = 2.5;
 const ASTEROID_RADIUS: f32 = 2.5;
+const HEALTH: f32 = 80.0;
+const COLLISION_DAMAGE: f32 = 35.0;
 
 #[derive(Component, Debug)]
 pub struct AsteroidPlugin;
@@ -30,7 +33,9 @@ impl Plugin for AsteroidPlugin {
         });
         app.add_systems(
             Update,
-            (spawn_asteroid, rotation_asteroid, handle_asteroid_collision),
+            (spawn_asteroid, rotation_asteroid)
+                .chain()
+                .in_set(InGameSet::EntityUpdates),
         );
     }
 }
@@ -76,6 +81,8 @@ fn spawn_asteroid(
             },
         },
         Asteroid,
+        Health::new(HEALTH),
+        CollisionDamage::new(COLLISION_DAMAGE),
     ));
 }
 
@@ -83,28 +90,5 @@ fn rotation_asteroid(mut query: Query<&mut Transform, With<Asteroid>>, time: Res
     for mut transform in query.iter_mut() {
         transform.rotate_local_z(ASTEROID_ROTATION_SPEED * time.delta_seconds());
         transform.rotate_local_y(ASTEROID_ROTATION_SPEED * time.delta_seconds());
-    }
-}
-
-fn handle_asteroid_collision(
-    mut commands: Commands,
-    asteroid_query: Query<(Entity, &Collider), With<Asteroid>>,
-    spaceship_query: Query<Entity, With<spaceship::Spaceship>>,
-) {
-    let spaceship_entity = spaceship_query.single();
-    for (entity, collider) in asteroid_query.iter() {
-        for &collied_entity in &collider.collding_entities {
-            if asteroid_query.get(collied_entity).is_ok() {
-                continue;
-            }
-
-            commands.entity(entity).despawn_recursive();
-            if collied_entity == spaceship_entity {
-                info!("Spaceship collided with asteroid.");
-                continue;
-            }
-
-            commands.entity(collied_entity).despawn_recursive();
-        }
     }
 }
