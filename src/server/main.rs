@@ -16,7 +16,7 @@ use systems::setup_system;
 // use tracing::level_filters::LevelFilter;
 // use tracing_subscriber::{fmt, prelude::*};
 
-const SERVER_ADDR: &str = "127.0.0.1:12345";
+const SERVER_ADDR: &str = "127.0.0.1:5000";
 
 fn main() {
     let mut app = App::new();
@@ -35,7 +35,7 @@ fn main() {
         current_time: SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap(),
-        max_clients: 10,
+        max_clients: 64,
         protocol_id: 0,
         public_addresses: vec![server_addr],
         authentication: ServerAuthentication::Unsecure,

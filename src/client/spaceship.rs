@@ -5,6 +5,7 @@ use crate::{
     collision_detection::{Collider, CollisionDamage},
     health::Health,
     movement::{Acceleration, MovingObjectBundle, Velocity},
+    network::MyPlayer,
     schedule::InGameSet,
 };
 
@@ -31,12 +32,13 @@ pub struct SpaceshipPlugin;
 
 impl Plugin for SpaceshipPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, spawn_spaceship).add_systems(
-            Update,
-            (spaceship_movement_controls, space_weapons_controls)
-                .chain()
-                .in_set(InGameSet::UserInput),
-        );
+        app.add_systems(Startup, spawn_spaceship);
+        // .add_systems(
+        //     Update,
+        //     (spaceship_movement_controls, space_weapons_controls)
+        //         .chain()
+        // .in_set(InGameSet::UserInput),
+        // );
     }
 }
 
@@ -54,6 +56,7 @@ fn spawn_spaceship(mut commands: Commands, scene_asssets: Res<SceneAssets>) {
                 ..default()
             },
         },
+        MyPlayer,
         Spaceship,
         Health::new(SPACESHIP_HEALTH),
         CollisionDamage::new(SPACESHIP_COLLISION_DAMAGE),
